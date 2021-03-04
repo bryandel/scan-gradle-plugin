@@ -88,6 +88,7 @@ dependencies {
 
   implementation files ("nexus-platform-api/build/libs/nexus-platform-api-${version}.jar")
   implementation "org.sonatype.ossindex:ossindex-service-client:$ossIndexClientVersion"
+  implementation "com.google.code.gson:gson:2.8.1"
 
   testCompile gradleTestKit()
   testCompile "junit:junit:$junitVersion"

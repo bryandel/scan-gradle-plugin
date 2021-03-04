@@ -16,6 +16,8 @@
 package org.sonatype.gradle.plugins.scan.nexus.iq;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +39,8 @@ import com.sonatype.nexus.api.iq.scan.ScanResult;
 
 import org.sonatype.gradle.plugins.scan.common.DependenciesFinder;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.Input;
@@ -49,6 +53,8 @@ public class NexusIqScanTask
     extends DefaultTask
 {
   private final Logger log = LoggerFactory.getLogger(NexusIqScanTask.class);
+
+  private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   private static final String MINIMAL_SERVER_VERSION_REQUIRED = "1.69.0";
 
@@ -131,6 +137,17 @@ public class NexusIqScanTask
         else if (Action.ID_WARN.equals(actionTypeId)) {
           message.append("Sonatype IQ Server reports policy warning due to ").append(trigger).append("\n");
         }
+      }
+    }
+
+    String resultFile = extension.getResultFilePath();
+    if (resultFile != null) {
+      String json = gson.toJson(applicationPolicyEvaluation);
+      try (FileWriter writer = new FileWriter(resultFile)) {
+        writer.write(json);
+        message.append("Saved evaluation results to ").append(resultFile).append("\n");
+      } catch (IOException e) {
+        throw new GradleException("Could not export evaluation results to " + resultFile);
       }
     }
 
